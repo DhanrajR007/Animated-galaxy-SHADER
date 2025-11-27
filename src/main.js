@@ -29,6 +29,10 @@ parameters.size = 0.01;
 parameters.radius = 5;
 parameters.branches = 3;
 parameters.spin = 1;
+parameters.insideColor = "#ff6030";
+parameters.outsideColor = "#1b3984";
+parameters.randomness = 0;
+parameters.randomnessPower = 3;
 
 let geometry = null;
 let material = null;
@@ -46,18 +50,38 @@ const generateGalaxy = () => {
   // Geometry
   geometry = new THREE.BufferGeometry();
   const position = new Float32Array(parameters.count * 3);
+  const color = new Float32Array(parameters.count * 3);
+  const insideColor = new THREE.Color(parameters.insideColor);
+  const outsideColor = new THREE.Color(parameters.outsideColor);
   for (let i = 0; i < parameters.count; i++) {
     const i3 = i * 3;
+    // position
     const radius = Math.random() * parameters.radius;
     const spinAngle = radius * parameters.spin;
     const branchAngle =
       ((i % parameters.branches) / parameters.branches) * Math.PI * 2;
+    const randomX =
+      Math.pow(Math.random(), parameters.randomnessPower) *
+      (Math.random() < 0.5 ? 1 : -1);
+    const randomY =
+      Math.pow(Math.random(), parameters.randomnessPower) *
+      (Math.random() < 0.5 ? 1 : -1);
+    const randomZ =
+      Math.pow(Math.random(), parameters.randomnessPower) *
+      (Math.random() < 0.5 ? 1 : -1);
+    position[i3 + 0] = Math.cos(branchAngle + spinAngle) * radius + randomX;
+    position[i3 + 1] = randomY;
+    position[i3 + 2] = Math.sin(branchAngle + spinAngle) * radius + randomZ;
+    //Color
 
-    position[i3 + 0] = Math.cos(branchAngle + spinAngle) * radius;
-    position[i3 + 1] = 0;
-    position[i3 + 2] = Math.sin(branchAngle + spinAngle) * radius;
+    const mixedColor = insideColor.clone();
+    mixedColor.lerp(outsideColor, radius / parameters.radius);
+    color[i3 + 0] = mixedColor.r;
+    color[i3 + 1] = mixedColor.g;
+    color[i3 + 2] = mixedColor.b;
   }
   geometry.setAttribute("position", new THREE.BufferAttribute(position, 3));
+  geometry.setAttribute("color", new THREE.BufferAttribute(color, 3));
 
   // Material
 
@@ -66,7 +90,7 @@ const generateGalaxy = () => {
     sizeAttenuation: true,
     depthWrite: false,
     blending: THREE.AdditiveBlending,
-    color: "yellow",
+    vertexColors: true,
   });
 
   // Points
@@ -108,8 +132,21 @@ gui
   .max(5)
   .step(0.001)
   .onFinishChange(generateGalaxy);
-
+gui.addColor(parameters, "insideColor").onFinishChange(generateGalaxy);
+gui.addColor(parameters, "outsideColor").onFinishChange(generateGalaxy);
+gui
+  .add(parameters, "randomness")
+  .min(0)
+  .max(2)
+  .step(0.001)
+  .onFinishChange(generateGalaxy);
 scene.add(camera);
+gui
+  .add(parameters, "randomnessPower")
+  .min(1)
+  .max(10)
+  .step(0.001)
+  .onFinishChange(generateGalaxy);
 
 // Canvas
 const canvas = document.querySelector("#canvas");
@@ -144,6 +181,7 @@ window.addEventListener("resize", () => {
 const tick = () => {
   // Update controls
   controls.update();
+  points.rotation.y += 0.001;
 
   // Render
   renderer.render(scene, camera);
