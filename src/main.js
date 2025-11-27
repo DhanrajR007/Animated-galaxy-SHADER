@@ -49,12 +49,13 @@ const generateGalaxy = () => {
   for (let i = 0; i < parameters.count; i++) {
     const i3 = i * 3;
     const radius = Math.random() * parameters.radius;
+    const spinAngle = radius * parameters.spin;
     const branchAngle =
       ((i % parameters.branches) / parameters.branches) * Math.PI * 2;
 
-    position[i3 + 0] = Math.cos(branchAngle) * radius;
+    position[i3 + 0] = Math.cos(branchAngle + spinAngle) * radius;
     position[i3 + 1] = 0;
-    position[i3 + 2] = Math.sin(branchAngle) * radius;
+    position[i3 + 2] = Math.sin(branchAngle + spinAngle) * radius;
   }
   geometry.setAttribute("position", new THREE.BufferAttribute(position, 3));
 
@@ -101,7 +102,12 @@ gui
   .max(20)
   .step(1)
   .onFinishChange(generateGalaxy);
-gui.add(parameters, "spin").min(-5).max(5).step(0.001);
+gui
+  .add(parameters, "spin")
+  .min(-5)
+  .max(5)
+  .step(0.001)
+  .onFinishChange(generateGalaxy);
 
 scene.add(camera);
 
