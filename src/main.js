@@ -53,6 +53,7 @@ const generateGalaxy = () => {
   geometry = new THREE.BufferGeometry();
   const position = new Float32Array(parameters.count * 3);
   const color = new Float32Array(parameters.count * 3);
+  const randomness = new Float32Array(parameters.count * 3);
   const scale = new Float32Array(parameters.count * 1);
   const insideColor = new THREE.Color(parameters.insideColor);
   const outsideColor = new THREE.Color(parameters.outsideColor);
@@ -62,6 +63,12 @@ const generateGalaxy = () => {
     const radius = Math.random() * parameters.radius;
     const branchAngle =
       ((i % parameters.branches) / parameters.branches) * Math.PI * 2;
+
+    position[i3 + 0] = Math.cos(branchAngle) * radius;
+    position[i3 + 1] = 0.0;
+    position[i3 + 2] = Math.sin(branchAngle) * radius;
+
+    //randomness
     const randomX =
       Math.pow(Math.random(), parameters.randomnessPower) *
       (Math.random() < 0.5 ? 1 : -1) *
@@ -77,10 +84,10 @@ const generateGalaxy = () => {
       (Math.random() < 0.5 ? 1 : -1) *
       parameters.randomness *
       radius;
-    position[i3 + 0] = Math.cos(branchAngle) * radius + randomX;
-    position[i3 + 1] = randomY;
-    position[i3 + 2] = Math.sin(branchAngle) * radius + randomZ;
 
+    randomness[i3] = randomX;
+    randomness[i3 + 1] = randomY;
+    randomness[i3 + 2] = randomZ;
     //Color
 
     const mixedColor = insideColor.clone();
@@ -94,7 +101,7 @@ const generateGalaxy = () => {
   geometry.setAttribute("position", new THREE.BufferAttribute(position, 3));
   geometry.setAttribute("color", new THREE.BufferAttribute(color, 3));
   geometry.setAttribute("aScale", new THREE.BufferAttribute(scale, 1));
-
+  geometry.setAttribute("aRandomness", new THREE.BufferAttribute(randomness, 3));
   // Material
 
   material = new THREE.ShaderMaterial({
@@ -105,9 +112,9 @@ const generateGalaxy = () => {
     fragmentShader,
     uniforms: {
       uSize: { value: parameters.size * renderer.getPixelRatio() },
-      uTime:{
-        value:0
-      }
+      uTime: {
+        value: 0,
+      },
     },
   });
 
@@ -202,7 +209,7 @@ const tick = () => {
   // Render
   renderer.render(scene, camera);
   const elapsedTime = clock.getElapsedTime();
-  material.uniforms.uTime.value=elapsedTime;
+  material.uniforms.uTime.value = elapsedTime;
   // Call tick again on the next frame
   window.requestAnimationFrame(tick);
 };

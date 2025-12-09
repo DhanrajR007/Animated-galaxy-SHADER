@@ -14,8 +14,8 @@ void main()
     float distanceTocenter=length(modelPosition.xz);
     float offset=(1./distanceTocenter)*uTime*.2;
     angle+=offset;
-    modelPosition.x=cos(angle);
-    modelPosition.z=sin(angle);
+    modelPosition.x=cos(angle) *distanceTocenter;
+    modelPosition.z=sin(angle) *distanceTocenter;
 
     vec4 viewPosition=viewMatrix*modelPosition ;
     vec4 projectionPosition=projectionMatrix*viewPosition;
