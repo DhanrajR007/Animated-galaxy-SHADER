@@ -85,9 +85,9 @@ const generateGalaxy = () => {
       parameters.randomness *
       radius;
 
-    randomness[i3] = randomX;
-    randomness[i3 + 1] = randomY;
-    randomness[i3 + 2] = randomZ;
+    randomness[i3] = randomX  ;
+    randomness[i3 + 1] = randomY   ;
+    randomness[i3 + 2] = randomZ   ;
     //Color
 
     const mixedColor = insideColor.clone();
