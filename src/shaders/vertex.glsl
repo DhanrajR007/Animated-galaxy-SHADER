@@ -1,20 +1,28 @@
-
-uniform float uSize;  
+uniform float uTime;
+uniform float uSize;
 
 attribute float aScale;
 
 varying vec3 vColor;
 
-
 void main()
 {
-    vec4 modelPosition = modelMatrix * vec4(position, 1.0);
-    vec4 viewPosition = viewMatrix * modelPosition;
-    vec4 projectionPosition = projectionMatrix * viewPosition;
-    gl_Position = projectionPosition;
     
-    gl_PointSize = uSize * aScale;   
-    gl_PointSize *= ( 1.0 / - viewPosition.z );  
+    vec4 modelPosition=modelMatrix*vec4(position,1.);
+    
+    float angle=atan(modelPosition.x,modelPosition.z);
+    float distanceTocenter=length(modelPosition.xz);
+    float offset=(1./distanceTocenter)*uTime*.2;
+    angle+=offset;
+    modelPosition.x=cos(angle);
+    modelPosition.z=sin(angle);
 
-    vColor = color;
+    vec4 viewPosition=viewMatrix*modelPosition ;
+    vec4 projectionPosition=projectionMatrix*viewPosition;
+    gl_Position=projectionPosition;
+    
+    gl_PointSize=uSize*aScale;
+    gl_PointSize*=(1./-viewPosition.z);
+    
+    vColor=color;
 }
